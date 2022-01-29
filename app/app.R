@@ -63,8 +63,8 @@ observe({
                          # host ='172.18.0.3',
                          host="db",
                          #  port=5432,
-                         user = 'smc',
-                         password = '7B*LQckf')
+                         user = 'root',
+                         password = 'root')
 
   existing_tables <- DBI::dbListTables(con)
   if ('historic_data' %in% existing_tables) {
@@ -457,8 +457,8 @@ con <-DBI::dbConnect(pgdrv,
                      # host ='172.18.0.3',
                     host="db",
                      # port=5432,
-                         user = 'smc',
-                         password = '7B*LQckf')
+                         user = 'root',
+                         password = 'root')
 
 data$tables_db <- DBI::dbListTables(con)
 # DBI::dbListFields(con, 'historic_data')
@@ -473,8 +473,8 @@ con <-DBI::dbConnect(pgdrv,
                      # host ='172.18.0.3',
                     host="db",
                      # port=5432,
-                         user = 'smc',
-                         password = '7B*LQckf')
+                         user = 'root',
+                         password = 'root')
 
 res <- dbSendQuery(con, input$sql)
 data$db_orig <- tibble::tibble(dbFetch(res))
@@ -492,8 +492,8 @@ con <-DBI::dbConnect(pgdrv,
                      # host ='172.31.0.3',
                     host="db",
                     #  port=5432,
-                         user = 'smc',
-                         password = '7B*LQckf')
+                         user = 'root',
+                         password = 'root')
 
     if (!is.null(data$all)) {
       DBI::dbWriteTable(con, 'historic_data', data$all, append=FALSE, overwrite=TRUE, row.names=FALSE)
@@ -522,8 +522,8 @@ con <-DBI::dbConnect(pgdrv,
                  # host ='172.18.0.3',
                 host="db",
                 #  port=5432,
-                         user = 'smc',
-                         password = '7B*LQckf')
+                         user = 'root',
+                         password = 'root')
 
    if (nchar(input$table_name) > 0 & !is.null(data$db)) {
   DBI::dbWriteTable(con, input$table_name, data$db, append=FALSE, overwrite=TRUE, row.names=FALSE)
@@ -541,8 +541,8 @@ con <-DBI::dbConnect(pgdrv,
                # host ='172.18.0.3',
               host="db",
               #  port=5432,
-                         user = 'smc',
-                         password = '7B*LQckf')
+                         user = 'root',
+                         password = 'root')
 
 existing_tables <- DBI::dbListTables(con)
   if (input$table_name %in% existing_tables & !is.null(data$db)) {
@@ -562,8 +562,8 @@ con <-DBI::dbConnect(pgdrv,
                       # host ='172.18.0.3',
                       host="db",
                       #  port=5432,
-                         user = 'smc',
-                         password = '7B*LQckf')
+                         user = 'root',
+                         password = 'root')
 
   existing_tables <- DBI::dbListTables(con)
   if (input$table_name %in% existing_tables) {
