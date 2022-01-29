@@ -54,7 +54,7 @@ COPY app/Rprofile.site /usr/lib/R/etc/
 EXPOSE 3838
 EXPOSE 5432
 
-CMD ["R", "-e", "shiny::runApp('/root/app/a848.R')"]
+CMD ["R", "-e", "shiny::runApp('/root/app/app.R')"]
 
 
 # docker build -t duplicate-finder .
@@ -67,4 +67,4 @@ CMD ["R", "-e", "shiny::runApp('/root/app/a848.R')"]
 # docker tag duplicate-finder:latest bouldermaettel/dupliate-finder:latest
 # docker login -u bouldermaettel
 # docker push bouldermaettel/dupliate-finder:latest
-# bouldermaettel@bouldermaettelsZBOOK:~/PycharmProjects/A848_standalone/ R -e "shiny::runApp('a848.R')"
+# bouldermaettel@bouldermaettelsZBOOK:~/PycharmProjects/A848_standalone/ R -e "shiny::runApp('app.R')"

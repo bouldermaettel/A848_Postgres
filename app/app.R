@@ -1,5 +1,31 @@
-# server side of A848
-function(input, output, session){
+rm(list = ls())
+packagesToLoad <- c('RPostgreSQL', 'shiny', 'shinythemes' ,'shinyWidgets', 'DT', 'dplyr', 'readxl', 'shinydashboard',
+                    'shinydashboardPlus', 'data.table', 'fresh','shinyjs', 'shinyBS', 'openxlsx', 'rhandsontable',
+                    'excelR', 'shinyalert')
+
+# do the loading and print wether the package is installed
+sapply(packagesToLoad, function(x) {require(x,character.only=TRUE)} )
+
+addResourcePath('A848_logo', 'www/A848_logo.jpg')
+addResourcePath('ProfilFoto', 'www/ProfilFoto.jpg')
+addResourcePath('app.css', 'www/app.css')
+
+source('app_helper_files/radioTooltips.R')
+
+ui <- function(request) {
+source('app_helper_files/header.R')
+source('app_helper_files/sidebar.R')
+source('app_helper_files/body.R')
+source('app_helper_files/controlbar.R')
+
+  dashboardPage(skin='red-light',
+    header,
+    sidebar,
+    body,
+   controlbar)
+}
+
+server <- function(input, output, session){
 
 #   format_data <- function(data) {
 #   data %>% datatable( options = list(searching = T, pageLength=20, lengthMenu = c(10, 20, 30, 50, 100, 200),
@@ -28,38 +54,37 @@ js$hidehead('')
 # adapt the max size of file-upload
 options(shiny.maxRequestSize=50000*1024^2)
 
-# # load data from PostgreSQL database
-# observe({
-#   if (wb$upload == 0) {
-#     pgdrv <- dbDriver(drvName = "PostgreSQL")
-#     con <-DBI::dbConnect(pgdrv,
-#                          dbname ="postgres",
-#                          # host ='172.18.0.3',
-#                          host="db",
-#                          #  port=5432,
-#                          user = 'root',
-#                          password = 'root')
-#                          # user = 'shiny_user',
-#                          # password = '7B*LQckf')
-#   existing_tables <- DBI::dbListTables(con)
-#   if ('historic_data' %in% existing_tables) {
-#       res <- dbSendQuery(con, 'SELECT * FROM historic_data')
-#       data$hist <- tibble::tibble(dbFetch(res))
-#   } else {
-#       data$hist <- NULL
-#   }
-# }
-# # DBI::dbDisconnect(con)
-#   wb$upload <- 1
-# })
-
-# load data from database (inside Docker)
+# load data from PostgreSQL database
 observe({
   if (wb$upload == 0) {
-    data$hist <- tibble::tibble(readRDS(file = "./data/data_test.rds")) %>% arrange(desc(ID_SMC))
-    wb$upload <- 1
-    }
+    pgdrv <- dbDriver(drvName = "PostgreSQL")
+    con <-DBI::dbConnect(pgdrv,
+                         dbname ="postgres",
+                         # host ='172.18.0.3',
+                         host="db",
+                         #  port=5432,
+                         user = 'smc',
+                         password = '7B*LQckf')
+
+  existing_tables <- DBI::dbListTables(con)
+  if ('historic_data' %in% existing_tables) {
+      res <- dbSendQuery(con, 'SELECT * FROM historic_data')
+      data$hist <- tibble::tibble(dbFetch(res))
+  } else {
+      data$hist <- NULL
+  }
+}
+# DBI::dbDisconnect(con)
+  wb$upload <- 1
 })
+
+# # load data from database (inside Docker)
+# observe({
+#   if (wb$upload == 0) {
+#     data$hist <- tibble::tibble(readRDS(file = "./data/data_test.rds")) %>% arrange(desc(ID_SMC))
+#     wb$upload <- 1
+#     }
+# })
 
 
 # import new file (from user)
@@ -432,9 +457,11 @@ con <-DBI::dbConnect(pgdrv,
                      # host ='172.18.0.3',
                     host="db",
                      # port=5432,
-                    user = 'root',
-                    password = 'root')
+                         user = 'smc',
+                         password = '7B*LQckf')
+
 data$tables_db <- DBI::dbListTables(con)
+# DBI::dbListFields(con, 'historic_data')
 DBI::dbDisconnect(con)
       }
   })
@@ -446,26 +473,29 @@ con <-DBI::dbConnect(pgdrv,
                      # host ='172.18.0.3',
                     host="db",
                      # port=5432,
-                    user = 'root',
-                    password = 'root')
-res <- dbSendQuery(con, input$sql)
-data$db <- tibble::tibble(dbFetch(res))
+                         user = 'smc',
+                         password = '7B*LQckf')
 
+res <- dbSendQuery(con, input$sql)
+data$db_orig <- tibble::tibble(dbFetch(res))
 })
 
-
+observe({
+  data$db <- data$db_orig[,input$columns]
+})
 
     # save new file
 observeEvent(input$transfer, {
       pgdrv <- dbDriver(drvName = "PostgreSQL")
 con <-DBI::dbConnect(pgdrv,
                     dbname ="postgres",
-                     # host ='172.18.0.3',
+                     # host ='172.31.0.3',
                     host="db",
                     #  port=5432,
-                    user = 'root',
-                    password = 'root')
-    if (exists(data$all)) {
+                         user = 'smc',
+                         password = '7B*LQckf')
+
+    if (!is.null(data$all)) {
       DBI::dbWriteTable(con, 'historic_data', data$all, append=FALSE, overwrite=TRUE, row.names=FALSE)
     } else {
       DBI::dbWriteTable(con, 'historic_data', data$hist, append=FALSE, overwrite=TRUE, row.names=FALSE)
@@ -492,8 +522,9 @@ con <-DBI::dbConnect(pgdrv,
                  # host ='172.18.0.3',
                 host="db",
                 #  port=5432,
-                user = 'root',
-                password = 'root')
+                         user = 'smc',
+                         password = '7B*LQckf')
+
    if (nchar(input$table_name) > 0 & !is.null(data$db)) {
   DBI::dbWriteTable(con, input$table_name, data$db, append=FALSE, overwrite=TRUE, row.names=FALSE)
    } else {
@@ -510,8 +541,9 @@ con <-DBI::dbConnect(pgdrv,
                # host ='172.18.0.3',
               host="db",
               #  port=5432,
-              user = 'root',
-              password = 'root')
+                         user = 'smc',
+                         password = '7B*LQckf')
+
 existing_tables <- DBI::dbListTables(con)
   if (input$table_name %in% existing_tables & !is.null(data$db)) {
     DBI::dbWriteTable(con, input$table_name, data$db, append=TRUE, overwrite=FALSE, row.names=FALSE)
@@ -530,8 +562,9 @@ con <-DBI::dbConnect(pgdrv,
                       # host ='172.18.0.3',
                       host="db",
                       #  port=5432,
-                      user = 'root',
-                      password = 'root')
+                         user = 'smc',
+                         password = '7B*LQckf')
+
   existing_tables <- DBI::dbListTables(con)
   if (input$table_name %in% existing_tables) {
   DBI::dbRemoveTable(con, input$table_name)
@@ -553,3 +586,7 @@ content = function(file) {
 )
 
 }
+
+shinyApp(ui = ui, server = server)
+
+# to log database: docker logs -tf container_id
