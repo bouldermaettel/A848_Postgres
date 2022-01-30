@@ -256,6 +256,7 @@ wb[['duplicates']] <- openxlsx::createWorkbook()
     sheet_name <- substr(paste(input$excel,input$tabs, input$data_source, sep="_"),1,31)
     make_sheet(sheet_name, data$db, admin_rows, wb)
   }
+shinyalert(title="Data added to excel sheet", showConfirmButton = FALSE, timer=1000, type = "success")
 })
 
   output$xlsx <- downloadHandler(
@@ -433,7 +434,7 @@ shiny::observeEvent(input$cancel, {shiny::removeModal()})
 shiny::observeEvent(input$delete_confirm, {shiny::removeModal()})
 
 output$user_group <- renderText({
-Sys.getenv('SHINYPROXY_USERGROUPS')
+usergroups <- Sys.getenv('SHINYPROXY_USERGROUPS')
 })
 
 outputOptions(output, 'user_group', suspendWhenHidden = FALSE)

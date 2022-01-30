@@ -1,6 +1,6 @@
 controlbar <-
   dashboardControlbar(skin = "light", collapsed = TRUE, width = 400,
-  conditionalPanel('output.user_group == `ADMIN` && input.tabs == `admin`',
+  conditionalPanel('(output.user_group == `ADMIN` || output.user_group == `A848SU`)  && input.tabs == `admin`',
   controlbarMenu(
   id = "menu",
   controlbarItem(
