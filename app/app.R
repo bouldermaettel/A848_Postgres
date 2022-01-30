@@ -66,8 +66,8 @@ observe({
                          user = 'root',
                          password = 'root')
 
-  existing_tables <- DBI::dbListTables(con)
-  if ('historic_data' %in% existing_tables) {
+  data$tables_db <- DBI::dbListTables(con)
+  if ('historic_data' %in% data$tables_db) {
       res <- dbSendQuery(con, 'SELECT * FROM historic_data')
       data$hist <- tibble::tibble(dbFetch(res))
   } else {
@@ -124,6 +124,14 @@ updateSelectizeInput(session, "columns",
 updateSelectizeInput(session, "grouping_vars",
            choices= colnames(data$hist),
            selected = c('Name', 'Vorname'))
+
+updateSelectizeInput(session, "columns_admin",
+         choices= colnames(data$db_orig),
+         selected = colnames(data$db_orig))
+
+updateSelectizeInput(session, "postgres_tables",
+     choices= data$tables_db,
+     selected = data$existing_tables[1])
 })
 
 # get unique records
@@ -450,22 +458,22 @@ output$sp_user <- renderText({
   # load data from the database
     # load data from database
 
-  observe({
-    if (input$tabs == 'admin') {
-pgdrv <- dbDriver(drvName = "PostgreSQL")
-con <-DBI::dbConnect(pgdrv,
-                    dbname ="postgres",
-                     # host ='172.18.0.3',
-                    host="db",
-                     # port=5432,
-                         user = 'root',
-                         password = 'root')
-
-data$tables_db <- DBI::dbListTables(con)
-# DBI::dbListFields(con, 'historic_data')
-DBI::dbDisconnect(con)
-      }
-  })
+#   observe({
+#     if (input$tabs == 'admin') {
+# pgdrv <- dbDriver(drvName = "PostgreSQL")
+# con <-DBI::dbConnect(pgdrv,
+#                     dbname ="postgres",
+#                      # host ='172.18.0.3',
+#                     host="db",
+#                      # port=5432,
+#                          user = 'root',
+#                          password = 'root')
+#
+# data$tables_db <- DBI::dbListTables(con)
+# # DBI::dbListFields(con, 'historic_data')
+# DBI::dbDisconnect(con)
+#       }
+#   })
 
 observeEvent(input$execute, {
 pgdrv <- dbDriver(drvName = "PostgreSQL")
@@ -476,13 +484,17 @@ con <-DBI::dbConnect(pgdrv,
                      # port=5432,
                          user = 'root',
                          password = 'root')
-
-res <- dbSendQuery(con, input$sql)
-data$db_orig <- tibble::tibble(dbFetch(res))
+existing_tables <- DBI::dbListTables(con)
+# if (input$table_name %in% existing_tables) {
+  res <- dbSendQuery(con, paste('SELECT * FROM', input$postgres_tables))
+  data$db_orig <- tibble::tibble(dbFetch(res))
+# } else {
+#    shinyalert("Try again brudi!", "The table name you entered does not exist", type = "error")
+# }
 })
 
 observe({
-  data$db <- data$db_orig[,input$columns]
+  data$db <- data$db_orig[,input$columns_admin]
 })
 
     # save new file
@@ -502,6 +514,7 @@ con <-DBI::dbConnect(pgdrv,
       DBI::dbWriteTable(con, 'historic_data', data$hist, append=FALSE, overwrite=TRUE, row.names=FALSE)
     }
       DBI::dbDisconnect(con)
+  shinyalert(title="Data saved in PostreSQL database", showConfirmButton = FALSE, timer=1000, type = "success")
 })
 
 output$available_dbs <- renderTable({
@@ -582,7 +595,7 @@ filename = function() {
 },
 content = function(file) {
   admin_rows <- get_rows(input$admin_rows_selected, input$admin_rows_all)
-  saveRDS(data$db[admin_rows, ], file = file)
+  saveRDS(data$db[admin_rows,input$columns_admin], file = file)
 }
 )
 
