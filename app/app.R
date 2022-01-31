@@ -27,12 +27,6 @@ source('app_helper_files/controlbar.R')
 
 server <- function(input, output, session){
 
-#   format_data <- function(data) {
-#   data %>% datatable( options = list(searching = T, pageLength=20, lengthMenu = c(10, 20, 30, 50, 100, 200),
-#                               columnDefs = list(list(className = 'dt-left', targets = '_all')), autoWidth = TRUE, scrollx=TRUE),
-#              filter = list( position = 'top', clear = TRUE ), fillContainer = FALSE)
-# }
-
 source('src/data/data_wrangler.R')
 
 variable <- reactiveValues()
@@ -371,7 +365,7 @@ observeEvent(input$delete_rows, {
       text = "This action can not be undone!",
       type = "warning",
       showCancelButton = TRUE,
-      confirmButtonCol = '#DD6B55',
+      confirmButtonCol = '#4CB00BBA',
       confirmButtonText = 'Yes, delete them!'
     )
 })
@@ -387,7 +381,7 @@ observeEvent(input$delete_table, {
       text = "This action can not be undone!",
       type = "warning",
       showCancelButton = TRUE,
-      confirmButtonCol = '#DD6B55',
+      confirmButtonCol = '#4CB00BBA',
       confirmButtonText = 'Yes, delete it!'
     )
 })
@@ -442,7 +436,7 @@ shiny::observeEvent(input$cancel, {shiny::removeModal()})
 shiny::observeEvent(input$delete_confirm, {shiny::removeModal()})
 
 output$user_group <- renderText({
-usergroups <- Sys.getenv('SHINYPROXY_USERGROUPS')
+Sys.getenv('SHINYPROXY_USERGROUPS')
 })
 
 outputOptions(output, 'user_group', suspendWhenHidden = FALSE)
@@ -542,7 +536,7 @@ con <-DBI::dbConnect(pgdrv,
    if (nchar(input$table_name) > 0 & !is.null(data$db)) {
   DBI::dbWriteTable(con, input$table_name, data$db, append=FALSE, overwrite=TRUE, row.names=FALSE)
    } else {
-      shinyalert("Try again brudi!", "Either ou forgot to fill in a name for the table, or to load data.", type = "error")
+      shinyalert("Give it another try!", "Either ou forgot to fill in a name for the table, or to load data.", type = "error")
    }
   DBI::dbDisconnect(con)
 })
@@ -562,7 +556,7 @@ existing_tables <- DBI::dbListTables(con)
   if (input$table_name %in% existing_tables & !is.null(data$db)) {
     DBI::dbWriteTable(con, input$table_name, data$db, append=TRUE, overwrite=FALSE, row.names=FALSE)
   } else {
-     shinyalert("Try again brudi!", "Either no table in the PostgreSQL matched your entered, or you forgot to laod data", type = "error")
+     shinyalert("Give it another try!", "Either no table in the PostgreSQL matched your entered, or you forgot to laod data", type = "error")
   }
 DBI::dbDisconnect(con)
 })
@@ -583,7 +577,7 @@ con <-DBI::dbConnect(pgdrv,
   if (input$table_name %in% existing_tables) {
   DBI::dbRemoveTable(con, input$table_name)
    } else {
-      shinyalert("Try again brudi!", "The entered table does not exist!", type = "error")
+      shinyalert("Give it another try!", "The entered table does not exist!", type = "error")
    }
   DBI::dbDisconnect(con)
   }

@@ -9,9 +9,10 @@
               badgeLabel = "analysis", badgeColor = "green"),
     menuItem("Duplicates", icon = icon('line-chart'), tabName = 'duplicates',
              badgeLabel = "analysis", badgeColor = "green"),
-  # conditionalPanel('output.user_group == `ADMIN`',
-    menuItem("Admin", icon = icon('unlock-alt'), tabName = 'admin',
-             badgeLabel = "admin", badgeColor = "red"),
+  conditionalPanel('output.user_group == `ADMIN` || output.user_group == `A848SU`',
+   # wrap again in sidebarMenu to be properly displayed!
+    sidebarMenu(menuItem("Admin", icon = icon('unlock-alt'), tabName = 'admin',
+             badgeLabel = "admin", badgeColor = "red"))),
 
   shinyWidgets::awesomeRadio('data_source', 'Choose data source', choices = c("historic"),
                              selected = "historic", status = "danger"),

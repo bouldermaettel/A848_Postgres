@@ -224,3 +224,9 @@ input[type='radio']:checked {
 /*  display: block;*/
 /*  background-color: rgba(224, 0, 7, 1);*/
 /*}*/
+
+/*input[type='radio']:checked {*/
+/*  content: '✔';*/
+/*  color: white;*/
+/*  background-color: rgb(199, 195, 195);*/
+/*}*/
