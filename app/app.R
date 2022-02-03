@@ -281,8 +281,12 @@ output$dirs <- renderText({
 
 ############################## Excel to edit data!
 observeEvent(input$edit_table, {
-source('app_helper_files/modal_dialog.R')
+  if (input$tabs != 'admin') {
+    source('app_helper_files/modal_dialog.R')
     modal_dialog %>% shiny::showModal()
+  } else {
+   shinyalert("The edit function is not available in the admin tab!", "Editing is available in all other tabs", type = "error")
+  }
 })
 
 # Excel input$tabs == 'data':
